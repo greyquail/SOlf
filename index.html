@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Shifter Golf</title>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background: #eef; }
+        canvas { display: block; background: #eef; }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <button id="drawRect">Rectangle</button>
+        <button id="drawCircle">Circle</button>
+        <button id="reset">Reset</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
