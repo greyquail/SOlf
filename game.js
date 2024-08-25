@@ -26,7 +26,7 @@ Runner.run(runner, engine);
 
 // Game state
 let currentLevel = 1;
-const totalLevels = 50;
+const totalLevels = 10;
 let currentShape = 'rect';
 let isDrawing = false;
 let points = [];
@@ -68,10 +68,9 @@ function loadLevel(level) {
 }
 
 function setupLevel(level) {
-    // This function will configure the level based on its difficulty and type of challenge
-    if (level <= 20) {
+    if (level <= 3) {
         setupEasyLevel(level);
-    } else if (level <= 40) {
+    } else if (level <= 7) {
         setupModerateLevel(level);
     } else {
         setupDifficultLevel(level);
@@ -79,48 +78,99 @@ function setupLevel(level) {
 }
 
 function setupEasyLevel(level) {
-    // Example of an easy level
     const ball = Bodies.circle(100, 100, 20, { restitution: 0.7, render: { fillStyle: '#0095DD' } });
     const hole = Bodies.circle(width - 100, height - 100, 30, { isStatic: true, isSensor: true, render: { fillStyle: '#FF5733' } });
     World.add(world, [ball, hole]);
 
-    // Simple obstacles or guides
-    const rectObstacle = Bodies.rectangle(width / 2, height - 200, 200, 20, { isStatic: true, angle: Math.PI * 0.1 });
-    World.add(world, rectObstacle);
+    if (level === 2) {
+        const rectObstacle = Bodies.rectangle(width / 2, height - 200, 200, 20, { isStatic: true, angle: Math.PI * 0.1 });
+        World.add(world, rectObstacle);
+    }
+
+    if (level === 3) {
+        const rectObstacle1 = Bodies.rectangle(width / 3, height - 200, 200, 20, { isStatic: true, angle: Math.PI * 0.1 });
+        const rectObstacle2 = Bodies.rectangle(2 * width / 3, height - 300, 200, 20, { isStatic: true, angle: -Math.PI * 0.1 });
+        World.add(world, [rectObstacle1, rectObstacle2]);
+    }
 
     setupCollisionDetection(ball, hole);
 }
 
 function setupModerateLevel(level) {
-    // Example of a moderate level
     const ball = Bodies.circle(100, 100, 20, { restitution: 0.7, render: { fillStyle: '#0095DD' } });
     const hole = Bodies.circle(width - 150, height - 150, 30, { isStatic: true, isSensor: true, render: { fillStyle: '#FF5733' } });
     World.add(world, [ball, hole]);
 
-    // Add more complex obstacles, slopes, or dynamic elements
-    const slope = Bodies.rectangle(width / 2, height - 300, 300, 20, { isStatic: true, angle: Math.PI * 0.2 });
-    World.add(world, slope);
+    if (level === 4) {
+        const slope = Bodies.rectangle(width / 2, height - 300, 300, 20, { isStatic: true, angle: Math.PI * 0.2 });
+        World.add(world, slope);
+    }
 
-    const dynamicBlock = Bodies.rectangle(width / 2, height / 2, 100, 100, { restitution: 0.5 });
-    World.add(world, dynamicBlock);
+    if (level === 5) {
+        const dynamicBlock = Bodies.rectangle(width / 2, height / 2, 100, 100, { restitution: 0.5 });
+        World.add(world, dynamicBlock);
+    }
+
+    if (level === 6) {
+        const rain = createRain();
+        World.add(world, rain);
+    }
+
+    if (level === 7) {
+        const nails = createNails();
+        World.add(world, nails);
+    }
 
     setupCollisionDetection(ball, hole);
 }
 
 function setupDifficultLevel(level) {
-    // Example of a difficult level
     const ball = Bodies.circle(100, 100, 20, { restitution: 0.7, render: { fillStyle: '#0095DD' } });
     const hole = Bodies.circle(width - 200, height - 200, 30, { isStatic: true, isSensor: true, render: { fillStyle: '#FF5733' } });
     World.add(world, [ball, hole]);
 
-    // Add challenging obstacles and tight spaces
-    const narrowPassage = Bodies.rectangle(width / 2, height - 250, 100, 20, { isStatic: true });
-    World.add(world, narrowPassage);
+    if (level === 8) {
+        const narrowPassage = Bodies.rectangle(width / 2, height - 250, 100, 20, { isStatic: true });
+        World.add(world, narrowPassage);
+    }
 
-    const dynamicObstacle = Bodies.rectangle(width / 2, height / 2, 50, 50, { restitution: 0.8 });
-    World.add(world, dynamicObstacle);
+    if (level === 9) {
+        const movingObstacle = Bodies.rectangle(width / 2, height / 2, 50, 50, { restitution: 0.8 });
+        World.add(world, movingObstacle);
+    }
+
+    if (level === 10) {
+        const rain = createRain();
+        const nails = createNails();
+        World.add(world, [rain, nails]);
+    }
 
     setupCollisionDetection(ball, hole);
+}
+
+function createRain() {
+    const raindrops = [];
+    for (let i = 0; i < 50; i++) {
+        const drop = Bodies.circle(Math.random() * width, Math.random() * height, 2, {
+            isStatic: true,
+            render: { fillStyle: '#00f' }
+        });
+        raindrops.push(drop);
+    }
+    return raindrops;
+}
+
+function createNails() {
+    const nails = [];
+    for (let i = 0; i < 10; i++) {
+        const nail = Bodies.rectangle(Math.random() * width, Math.random() * height, 10, 30, {
+            isStatic: true,
+            angle: Math.PI * Math.random(),
+            render: { fillStyle: '#555' }
+        });
+        nails.push(nail);
+    }
+    return nails;
 }
 
 function setupCollisionDetection(ball, hole) {
@@ -130,11 +180,16 @@ function setupCollisionDetection(ball, hole) {
                 alert(`Level ${currentLevel} Complete!`);
                 currentLevel++;
                 if (currentLevel > totalLevels) {
-                    alert('Congratulations! You have completed all levels!');
+                    alert('Congratulations! You completed all levels!');
                     currentLevel = 1;
                 }
-                updateLevelInfo();
-                loadLevel(currentLevel);
+                resetGame();
+            }
+            if (pair.bodyA === ball || pair.bodyB === ball) {
+                if (pair.bodyA.label === 'nail' || pair.bodyB.label === 'nail') {
+                    alert('Ball popped! Try again.');
+                    resetGame();
+                }
             }
         });
     });
@@ -187,4 +242,5 @@ function finishDrawing(event) {
 function resetGame() {
     loadLevel(currentLevel);
 }
+
 
