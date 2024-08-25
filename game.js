@@ -140,3 +140,51 @@ function setupCollisionDetection(ball, hole) {
     });
 }
 
+function startDrawing(event) {
+    if (event.type === 'touchstart') {
+        event.clientX = event.touches[0].clientX;
+        event.clientY = event.touches[0].clientY;
+    }
+    startX = event.clientX;
+    startY = event.clientY;
+    isDrawing = true;
+
+    if (currentShape === 'irregular') {
+        points.push({ x: startX, y: startY });
+    }
+}
+
+function finishDrawing(event) {
+    if (event.type === 'touchend') {
+        event.clientX = event.changedTouches[0].clientX;
+        event.clientY = event.changedTouches[0].clientY;
+    }
+    if (isDrawing) {
+        const endX = event.clientX;
+        const endY = event.clientY;
+        const width = Math.abs(endX - startX);
+        const height = Math.abs(endY - startY);
+
+        if (currentShape === 'rect') {
+            const rect = Bodies.rectangle((startX + endX) / 2, (startY + endY) / 2, width, height, { isStatic: true });
+            World.add(world, rect);
+        } else if (currentShape === 'circle') {
+            const radius = Math.max(width, height) / 2;
+            const circle = Bodies.circle(startX, startY, radius, { isStatic: true });
+            World.add(world, circle);
+        } else if (currentShape === 'irregular' && points.length > 2) {
+            points.push({ x: endX, y: endY });
+            const vertices = points.map(point => ({ x: point.x, y: point.y }));
+            const irregular = Bodies.fromVertices(startX, startY, [vertices], { isStatic: true });
+            World.add(world, irregular);
+            points = [];
+        }
+
+        isDrawing = false;
+    }
+}
+
+function resetGame() {
+    loadLevel(currentLevel);
+}
+
